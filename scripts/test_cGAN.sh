@@ -29,7 +29,7 @@ LAM_A=100
 NITER=500
 NITERD=100
 BATCHSIZE=150
-EPOCH=400 #test at which epoch?
+EPOCH=latest #test at which epoch?
 CUDA_ID=0
 
 if [ ! -d "./checkpoints/${experiment_dir}" ]; then
