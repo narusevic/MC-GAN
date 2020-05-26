@@ -20,11 +20,11 @@ MODEL_G=resnet_6blocks
 MODEL_D=n_layers
 n_layers_D=1
 NORM=batch
-IN_NC=26
-O_NC=26
+IN_NC=32
+O_NC=32
 IN_NC_1=3
 O_NC_1=3
-GRP=26
+GRP=32
 PRENET=2_layers
 FINESIZE=64
 LOADSIZE=64
@@ -55,7 +55,7 @@ fi
 # =======================================
 all_epochs=()
 init_epoch=$(seq 0 1 25);
-mid_epoch=$(seq 26 2 100 );
+mid_epoch=$(seq 32 2 100 );
 rest_epoch=$(seq 101 20 $EPOCH1 );
 all_epochs+=$init_epoch
 all_epochs+=" "

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 #=============================
 # MC-GAN
 # Modified from https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix
@@ -23,6 +25,20 @@ from torch.autograd import Variable
 import warnings
 import pickle
 
+lith_counter = np.empty(32)
+lith_counter.fill(0)
+
+lith_lastData = np.empty(32)
+lith_lastData.fill(0)
+
+lith_result = np.empty(32)
+lith_result.fill(0)
+
+lith_result_ssim = np.empty(32)
+lith_result_ssim.fill(0)
+
+lith_result_mse = np.empty(32)
+lith_result_mse.fill(0)
 
 def normalize_stack(input,val=0.5):
     #normalize an tensor with arbitrary number of channels:
@@ -98,7 +114,6 @@ class FlatData(object):
             else:
                 file_name = map(lambda x:x.split("/")[-1],AB_paths)
                 blank_ind = self.random_dict[file_name][0:int(self.blanks*A.size(3)/target_size)]
-
             blank_ind = np.tile(range(target_size), len(blank_ind)) + np.repeat(blank_ind*target_size,target_size)
             AA.index_fill_(3,LongTensor(list(blank_ind)),1)
             # t_topil = transforms.Compose([
@@ -146,13 +161,18 @@ class Data(object):
                w_offset: w_offset + self.fineSize]
         n_rgb = 3 if self.rgb else 1
         
-        
         if self.blanks == 0:
             AA = A.clone()
         else: 
             #randomly remove some of the glyphs in input
             if not self.dict:
                 blank_ind = np.repeat(np.random.permutation(A.size(1)/n_rgb)[0:int(self.blanks*A.size(1)/n_rgb)],n_rgb)
+
+                lith_lastData.fill(0)
+                for lith_index, xd in enumerate(lith_counter, start=0):
+                    if lith_index not in blank_ind:
+                        lith_lastData[lith_index] = 1
+                        lith_counter[lith_index] = lith_counter[lith_index] + 1
             else:
                 file_name = map(lambda x:x.split("/")[-1],AB_paths)
                 if len(file_name)>1:
@@ -268,7 +288,7 @@ class StackDataLoader(BaseDataLoader):
                             font_trans=True, no_permutation=opt.no_permutation)
         len_A = len(dataset_A.imgs)
         shuffle_inds = np.random.permutation(len_A)
-        
+
         dataset_B = ImageFolder(root=opt.dataroot  + 'B/'+ opt.phase,
                               transform=transform, return_paths=True, rgb=opt.rgb_out,
                               fineSize=opt.fineSize, loadSize=opt.loadSize,
@@ -357,7 +377,7 @@ class PartialDataLoader(BaseDataLoader):
             shuffle_inds = np.random.permutation(len_A)
         else:
             shuffle_inds = range(len_A)
-        
+
         dataset_B = ImageFolder(root=opt.dataroot  + 'B/'+ opt.phase,
                               transform=transform, return_paths=True, rgb=opt.rgb, fineSize=opt.fineSize,
                               loadSize=opt.loadSize, font_trans=False, no_permutation=opt.no_permutation)

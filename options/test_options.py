@@ -15,5 +15,5 @@ class TestOptions(BaseOptions):
         self.parser.add_argument('--phase', type=str, default='test', help='train, val, test, etc')
         self.parser.add_argument('--which_epoch', type=str, default='latest', help='which epoch to load? set to latest to use latest cached model')
         self.parser.add_argument('--which_epoch1', type=str, default='0', help='which epoch of the en2end model to load?')
-        self.parser.add_argument('--how_many', type=int, default=1500, help='how many test images to run')
+        self.parser.add_argument('--how_many', type=int, default=5000, help='how many test images to run')
         self.isTrain = False

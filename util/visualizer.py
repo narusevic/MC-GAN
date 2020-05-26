@@ -10,12 +10,19 @@ import time
 from . import util
 from . import html
 import shutil
-from scipy import misc
+from scipy import misc, sum, average
 from skimage import data, img_as_float
 from skimage.measure import compare_ssim as ssim
 import skvideo.io
+from data.data_loader import lith_counter, lith_lastData, lith_result, lith_result_ssim, lith_result_mse
 
 
+
+def to_grayscale(arr):
+    if len(arr.shape) == 3:
+        return average(arr, -1)
+    else:
+        return arr
 
 
 class Visualizer():
@@ -41,10 +48,21 @@ class Visualizer():
     def eval_current_result(self,visuals):
         fake_B = visuals['fake_B'].copy()
         real_B = visuals['real_B'].copy()
+
+        diff = to_grayscale(fake_B) - to_grayscale(real_B) 
+        m_norm = sum(abs(diff))
+        m_norm_percentage = m_norm * 100 / 255 / real_B.size
         ssim_score = ssim(fake_B, real_B, data_range=real_B.max() - real_B.min())
         fake_B /= real_B.max()
         real_B /= real_B.max()
         mse_score = np.mean((fake_B - real_B)**2)
+
+        for lith_index, lith_lastData_letter in enumerate(lith_lastData):
+            if lith_lastData_letter == 1:
+                lith_result[lith_index] = lith_result[lith_index] + m_norm_percentage
+                lith_result_ssim[lith_index] = lith_result_ssim[lith_index] + ssim_score
+                lith_result_mse[lith_index] = lith_result_mse[lith_index] + mse_score
+
         return ssim_score, mse_score
 
 
@@ -106,7 +124,7 @@ class Visualizer():
     # save image to the disk
     def save_images(self, webpage, visuals, image_path):
         image_dir = webpage.get_image_dir()
-        print "save to:", image_dir
+        # print "save to:", image_dir
         short_path = ntpath.basename(image_path[0])
         name = os.path.splitext(short_path)[0]
 
